@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"cache/internal"
-	"cache/internal/storage"
 	_ "net/http/pprof"
+	"objectCache/internal"
+	"objectCache/internal/storage"
 	"testing"
 	"time"
 )

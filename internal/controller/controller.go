@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"cache/internal"
-	"cache/internal/storage"
 	"fmt"
+	"objectCache/internal"
+	"objectCache/internal/storage"
 	"time"
 )
 

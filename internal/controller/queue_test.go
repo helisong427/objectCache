@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"cache/internal"
+	"objectCache/internal"
 	"testing"
 	"time"
 )

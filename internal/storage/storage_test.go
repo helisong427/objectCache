@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"cache/internal"
+	"objectCache/internal"
 	"testing"
 	"time"
 )

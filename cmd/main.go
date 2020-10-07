@@ -3,12 +3,12 @@
 package main
 
 import (
-	"cache"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	_ "net/http/pprof"
+	"objectCache"
 	"runtime"
 	"time"
 )
@@ -17,7 +17,7 @@ const (
 	maxSize  = 9000000
 )
 
-var c = cache.NewCache(maxSize)
+var c = objectCache.NewCache(maxSize)
 
 func init() {
 	rand.Seed(time.Now().UnixNano())

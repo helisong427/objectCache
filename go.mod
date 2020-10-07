@@ -1,4 +1,4 @@
-module cache
+module objectCache
 
 go 1.12
 

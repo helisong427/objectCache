@@ -1,8 +1,8 @@
-package cache_test
+package objectCache_test
 
 import (
-	"cache"
 	"fmt"
+	"objectCache"
 	"time"
 )
 
@@ -12,8 +12,8 @@ type testData struct {
 }
 
 func ExampleNewCache() {
-	_ = cache.NewCache(1e5)
-	ca := cache.NewDefaultCache()
+	_ = objectCache.NewCache(1e5)
+	ca := objectCache.NewDefaultCache()
 	fmt.Println(ca.GetObjCount())
 	// Output:
 	// 0
@@ -21,7 +21,7 @@ func ExampleNewCache() {
 
 
 func ExampleCache_SetAndGet() {
-	var ca = cache.NewDefaultCache()
+	var ca = objectCache.NewDefaultCache()
 
 	d := testData{id: 100,name: "test1"}
 
@@ -38,7 +38,7 @@ func ExampleCache_SetAndGet() {
 }
 
 func ExampleCache_SetIntAndGetInt() {
-	var ca = cache.NewDefaultCache()
+	var ca = objectCache.NewDefaultCache()
 
 	d := testData{id: 100,name: "test1"}
 
@@ -55,7 +55,7 @@ func ExampleCache_SetIntAndGetInt() {
 }
 
 func ExampleCache_SetExpire() {
-	var ca = cache.NewDefaultCache()
+	var ca = objectCache.NewDefaultCache()
 
 	d := testData{id: 100,name: "test1"}
 

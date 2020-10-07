@@ -1,8 +1,8 @@
 package storage
 
 import (
-	"cache/internal"
 	"math"
+	"objectCache/internal"
 	"sync"
 	"time"
 )
