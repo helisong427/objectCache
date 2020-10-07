@@ -3,7 +3,6 @@ package controller
 import (
 	"cache/internal"
 	"cache/internal/storage"
-	"net/http"
 	_ "net/http/pprof"
 	"testing"
 	"time"
@@ -16,20 +15,18 @@ type objData struct {
 
 var c *Controller
 
-func init(){
+func TestController_1(t *testing.T) {
+	//go func() {
+	//	http.ListenAndServe("localhost:13001", nil)
+	//}()
+
 	var segments [storage.MaxSegmentSize]*storage.Storage
 	for i := 0; i < storage.MaxSegmentSize; i++ {
 		segments[i] = &storage.Storage{NodeMap: make(map[uint64]*internal.Node)}
 	}
 	var nodeCache = internal.NewNodeCache(1e6 / 4)
 	c = NewController(1e6, &segments, nodeCache)
-	//
-	go func() {
-		http.ListenAndServe("localhost:13001", nil)
-	}()
-}
 
-func TestController_1(t *testing.T) {
 
 	node := c.nodeCache.GetNode()
 	var hash = uint64(1)
@@ -45,9 +42,9 @@ func TestController_1(t *testing.T) {
 		t.Error("失败1", c.initialQueue.count)
 	}
 
-	select {
-
-	}
+	//select {
+	//
+	//}
 }
 
 

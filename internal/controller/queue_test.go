@@ -13,7 +13,7 @@ func Test_queue_Total(t *testing.T) {
 	//pushBack
 	for i := 0; i < queueNodeSize/2; i++ {
 		n := &internal.Node{Hash: uint64(i)}
-		//n.ResetRestBeginTimeAndCurrentCount()
+		n.UpdateNodeData(0)
 
 		ok := q.pushBack(n)
 		if !ok {
@@ -24,7 +24,7 @@ func Test_queue_Total(t *testing.T) {
 
 	for i := queueNodeSize/2; i < queueNodeSize; i++ {
 		n := &internal.Node{Hash: uint64(i)}
-		n.ResetRestBeginTimeAndCurrentCount()
+		n.UpdateNodeData(0)
 
 		ok := q.pushBack(n)
 		if !ok {
@@ -39,14 +39,14 @@ func Test_queue_Total(t *testing.T) {
 
 	//getExpireNodes
 	n := make([]*internal.Node, 0, 100)
-	expireTime := uint32(time.Now().Unix() - 5 ) % internal.CacheBaseTime
+	expireTime := uint32(time.Now().Unix() - 5 )
 	n, ok = q.fronts(expireTime, n)
 	if len(n) != queueNodeSize/2{
 		t.Error("失败4：", len(n))
 	}
 	time.Sleep(time.Second*5)
 	n = n[0:0]
-	expireTime = uint32(time.Now().Unix() - 5) % internal.CacheBaseTime
+	expireTime = uint32(time.Now().Unix() - 5)
 	n, ok = q.fronts(expireTime, n)
 	if len(n) != queueNodeSize/2{
 		t.Error("失败5：", len(n))

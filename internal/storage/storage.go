@@ -11,7 +11,8 @@ const (
 	MaxSegmentSize = 256
 )
 
-//存储段
+// Storage存储对象的并发单元
+// 持有一个读写锁和一个map，internal.Node直接存储与map中，读写锁就锁定这个map。
 type Storage struct {
 	sync.RWMutex
 	NodeMap map[uint64]*internal.Node

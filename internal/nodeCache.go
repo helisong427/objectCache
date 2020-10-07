@@ -6,17 +6,22 @@ import (
 )
 
 
-//NodeCache 用于缓存Node对象，减少动态分配给GC造成压力
+//NodeCache 用于缓存internal.Node对象，减少动态分配给GC造成压力
 type NodeCache struct {
-	cache chan *Node
+	//用于缓存node的channel
+	nodeChan chan *Node
 
-	dirtyNodes []*Node //脏数据，storage删除后而controller仍然管理着这个node的时候，暂存于此处。
+	//脏数据，storage删除后而controller仍然管理着这个node的时候暂存于此处。
+	//恢复脏数据逻辑：用户删除对象时，此node存与dirtyNodes里面，并标记node.Obj=nil；当controller检查到此node.Obj==nil，则标记node.Hash=0，并放弃
+	// 对此node的管理；recoverNode()协程检查到node.Hash==0则将此node加入到缓存的channel里面。
+	dirtyNodes []*Node
+
 	dirtyLock  sync.Mutex
 }
 
 func NewNodeCache(size int32) (n *NodeCache) {
 	n = &NodeCache{
-		cache:      make(chan *Node, size),
+		nodeChan:   make(chan *Node, size),
 		dirtyNodes: make([]*Node, 100),
 	}
 
@@ -27,7 +32,7 @@ func NewNodeCache(size int32) (n *NodeCache) {
 
 func (c *NodeCache) GetNode() (n *Node) {
 	select {
-	case n = <-c.cache:
+	case n = <-c.nodeChan:
 	default:
 		n = &Node{}
 	}
@@ -40,7 +45,7 @@ func (c *NodeCache) GetNode() (n *Node) {
 func (c *NodeCache) SaveNode(n *Node) {
 
 	select {
-	case c.cache <- n:
+	case c.nodeChan <- n:
 	default:
 		n = nil
 	}
@@ -69,6 +74,7 @@ func (c *NodeCache) SaveDirtyNode(n *Node) {
 
 
 // 恢复脏数据
+//
 func (c *NodeCache) recoverNode() {
 
 	//定时5分钟回收一次node

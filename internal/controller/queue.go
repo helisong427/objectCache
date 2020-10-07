@@ -8,7 +8,7 @@ const (
 	queueNodeSize = 5000
 )
 
-// 底层用数组实现的队列
+// queue底层用数组实现的队列，固定大小为queueNodeSize
 type queue struct {
 	head, tail int
 	queue      [queueNodeSize]*internal.Node

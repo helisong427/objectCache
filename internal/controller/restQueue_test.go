@@ -11,7 +11,7 @@ func Test_restQueue_Total(t *testing.T) {
 
 	rq := newRestQueue(10)
 	node := &internal.Node{Hash: 1}
-	//node.ResetRestBeginTimeAndCurrentCount()
+	node.UpdateNodeData(0)
 	rq.addNode(node)
 
 	nodes := make([]*internal.Node, 0, 10)
@@ -45,7 +45,7 @@ func Test_restQueue_Total1(t *testing.T) {
 
 	for i := 0; i < 10000; i++ {
 		node := &internal.Node{Hash: uint64(i)}
-		//node.ResetRestBeginTimeAndCurrentCount()
+		node.UpdateNodeData(0)
 		rq.addNode(node)
 	}
 

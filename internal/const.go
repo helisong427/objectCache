@@ -5,7 +5,7 @@ const(
 	LevelSize = 10
 
 	// controller中restQueue队列休息时间步长（10分钟）
-	LevelRestStep = uint64(120)
+	LevelRestStep = uint64(600)
 
 	// 计算频率的比例系数（千分比）
 	ScaleFactor = uint64(1000)

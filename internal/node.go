@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"sync/atomic"
 	"time"
 )
@@ -34,12 +33,12 @@ type Node struct {
 }
 
 //ResetRestBeginTimeAndCurrentCount 重置restBeginTime、currentCount
-func (n *Node) ResetRestBeginTimeAndCurrentCount() (node *Node) {
-
-	n.RestBeginTime = uint32(time.Now().Unix())
-	atomic.StoreUint32(&n.currentCount, 0)
-	return n
-}
+//func (n *Node) ResetRestBeginTimeAndCurrentCount() (node *Node) {
+//
+//	n.RestBeginTime = uint32(time.Now().Unix())
+//	atomic.StoreUint32(&n.currentCount, 0)
+//	return n
+//}
 
 //UpdateNodeData 当node从休息队列中取出来后更新RestUnitCount、currentCount
 func (n *Node) UpdateNodeData(CurrentTime uint32) {
@@ -52,13 +51,13 @@ func (n *Node) UpdateNodeData(CurrentTime uint32) {
 	// TotalTime、TotalCount是用于计算最近访问频率，这个最近的期限定为restQueue休息的最大时间，当超过这个时间就等比例缩放1倍
 	if uint64(n.TotalTime) >= LevelRestStep*LevelSize {
 
-		nodeAverageQut := uint64(n.TotalCount) * 1000 * NodeUnitRestTime / uint64(n.TotalTime)
+		//nodeAverageQf := uint64(n.TotalCount) * 1000 * NodeUnitRestTime / uint64(n.TotalTime)
 
-		fmt.Printf("node等比例缩放%d(%d-%d) ==>", nodeAverageQut, n.TotalTime, n.TotalCount)
+		//fmt.Printf("node等比例缩放%d(%d-%d) ==>", nodeAverageQf, n.TotalTime, n.TotalCount)
 		n.TotalTime = n.TotalTime / 2
 		n.TotalCount = n.TotalCount / 2
-		nodeAverageQut = uint64(n.TotalCount) * 1000 * NodeUnitRestTime / uint64(n.TotalTime)
-		fmt.Printf("%d(%d-%d) \n", nodeAverageQut, n.TotalTime, n.TotalCount)
+		//nodeAverageQf = uint64(n.TotalCount) * 1000 * NodeUnitRestTime / uint64(n.TotalTime)
+		//fmt.Printf("%d(%d-%d) \n", nodeAverageQf, n.TotalTime, n.TotalCount)
 	}
 
 	n.RestBeginTime = uint32(time.Now().Unix())

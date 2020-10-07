@@ -18,6 +18,50 @@ var mapDemo = make(map[string]*dataDemo)
 var syncMapDemo sync.Map
 const N = 6e7 // 6000w
 
+
+func init() {
+	initCache()
+	//initMap()
+	//initSyncMap()
+}
+
+func initCache() {
+	for i := 0; i < 60000000; i++{
+		_ = cacheDemo.SetInt(int64(i), &dataDemo{
+			id: i,
+			name: "haha",
+		}, 10)
+
+	}
+	fmt.Println("init cache end")
+	//timeGC()
+}
+
+func initMap() {
+	for i := 0; i < 60000000; i++{
+		key := fmt.Sprintf("%d",i)
+		mapDemo[key] = &dataDemo{
+			id: i,
+			name: "haha",
+		}
+	}
+	fmt.Println("init map end")
+	//timeGC()
+}
+
+func initSyncMap() {
+	for i := 0; i < 60000000; i++{
+		key := fmt.Sprintf("%d",i)
+		syncMapDemo.Store(key, &dataDemo{
+			id: i,
+			name: "haha",
+		})
+	}
+	fmt.Println("init sync map end")
+	//timeGC()
+}
+
+
 /**
 bruce@:~/go/src/cache$ go test -bench=BenchmarkCache_Set -run=none -count=5
 goos: linux
@@ -138,23 +182,8 @@ func BenchmarkSyncMap_Set(b *testing.B) {
 	})
 }
 
-func initCache() {
-	for i := 0; i < 60000000; i++{
-		_ = cacheDemo.SetInt(int64(i), &dataDemo{
-			id: i,
-			name: "haha",
-		}, 10)
 
-	}
-	fmt.Println("init cache end")
-	//timeGC()
-}
 
-func init() {
-	//initCache()
-	//initMap()
-	//initSyncMap()
-}
 
 /**
 bruce@:~/go/src/cache$  go test -bench=BenchmarkCache_Get -v -run=none
@@ -181,17 +210,7 @@ func BenchmarkCache_Get(b *testing.B) {
 	}
 }
 
-func initMap() {
-	for i := 0; i < 60000000; i++{
-		key := fmt.Sprintf("%d",i)
-		mapDemo[key] = &dataDemo{
-			id: i,
-			name: "haha",
-		}
-	}
-	fmt.Println("init map end")
-	//timeGC()
-}
+
 
 
 /**
@@ -244,17 +263,6 @@ func BenchmarkSyncCache_Get(b *testing.B) {
 }
 
 
-func initSyncMap() {
-	for i := 0; i < 60000000; i++{
-		key := fmt.Sprintf("%d",i)
-		syncMapDemo.Store(key, &dataDemo{
-			id: i,
-			name: "haha",
-		})
-	}
-	fmt.Println("init sync map end")
-	//timeGC()
-}
 
 
 /**

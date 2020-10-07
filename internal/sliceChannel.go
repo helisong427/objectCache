@@ -36,6 +36,7 @@ func (c *chanCache) set(ch chan *Node){
 	}
 }
 
+//SliceChannel 是一个不限定容量的channel（非阻塞方式存、取）
 type SliceChannel struct {
 
 	Channels []chan *Node
