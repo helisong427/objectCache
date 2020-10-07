@@ -13,21 +13,21 @@ type dataDemo struct {
 	name string
 }
 
-var cacheDemo = NewCache(65535*200)
 var mapDemo = make(map[string]*dataDemo)
 var syncMapDemo sync.Map
 const N = 6e7 // 6000w
 
 
 func init() {
-	initCache()
+	//initCache()
 	//initMap()
 	//initSyncMap()
 }
 
 func initCache() {
+	InitObjectCache(65535*200)
 	for i := 0; i < 60000000; i++{
-		_ = cacheDemo.SetInt(int64(i), &dataDemo{
+		_ = SetInt(int64(i), &dataDemo{
 			id: i,
 			name: "haha",
 		}, 10)
@@ -76,12 +76,12 @@ PASS
 ok      cache   31.036s
  */
 func BenchmarkCache_Set(b *testing.B) {
-	//var cacheDemo = cache.NewCache(65535*1024, &dataDemo{})
+	InitObjectCache(65535*200)
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := fmt.Sprintf("%d", i)
-		_ = cacheDemo.Set([]byte(key), &dataDemo{
+		_ = Set([]byte(key), &dataDemo{
 			id: i,
 			name: "haha",
 		}, 10)
@@ -132,7 +132,7 @@ PASS
 ok      cache   180.037s
  */
 func BenchmarkSyncCache_Set(b *testing.B) {
-
+	InitObjectCache(65535*200)
 	rand.Seed(time.Now().UnixNano())
 	b.ReportAllocs()
 	b.ResetTimer()
@@ -140,7 +140,7 @@ func BenchmarkSyncCache_Set(b *testing.B) {
 		for pb.Next() {
 			id := rand.Int63()
 			//key := fmt.Sprintf("%d", id)
-			_ = cacheDemo.SetInt(id, &dataDemo{
+			_ = SetInt(id, &dataDemo{
 				id: int(id),
 				name: "haha",
 			}, 10)
@@ -196,6 +196,7 @@ PASS
 ok      cache   164.477s
  */
 func BenchmarkCache_Get(b *testing.B) {
+	InitObjectCache(65535*200)
 	rand.Seed(time.Now().UnixNano())
 
 	b.ReportAllocs()
@@ -203,7 +204,7 @@ func BenchmarkCache_Get(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		key := rand.Int63n(60000000)
-		_, ok := cacheDemo.GetInt(key)
+		_, ok := GetInt(key)
 		if !ok{
 			b.Errorf("获取错误 key:%d", key)
 		}
@@ -248,13 +249,14 @@ PASS
 ok      cache   126.534s
  */
 func BenchmarkSyncCache_Get(b *testing.B) {
+	InitObjectCache(65535*200)
 	rand.Seed(time.Now().UnixNano())
 	b.ReportAllocs()
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			//key := fmt.Sprintf("%d", rand.Int63n(60000000))
-			_, ok := cacheDemo.GetInt(rand.Int63n(60000000))
+			_, ok := GetInt(rand.Int63n(60000000))
 			if !ok{
 				b.Error("获取错误")
 			}

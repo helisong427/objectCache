@@ -17,8 +17,6 @@ const (
 	maxSize  = 9000000
 )
 
-var c = objectCache.NewCache(maxSize)
-
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
@@ -53,7 +51,7 @@ func (s *segment) setData() (se *segment) {
 	var i int64
 	for i = s.begin; i <= s.end; i++ {
 		data := Data{Id: i}
-		ok := c.SetInt(i, data, 0)
+		ok := objectCache.SetInt(i, data, 0)
 		if !ok {
 			log.Println("setInt失败：", i)
 		}
@@ -80,7 +78,7 @@ func (s *segment) start() {
 
 					key := s.data[index]
 
-					_, ok := c.GetInt(key)
+					_, ok := objectCache.GetInt(key)
 					if !ok {
 						s.dataTail--
 						s.data[index] = s.data[s.dataTail]
@@ -108,6 +106,8 @@ func main() {
 	go func() {
 		http.ListenAndServe("localhost:13001", nil)
 	}()
+
+	objectCache.InitObjectCache(maxSize)
 
 	var segments [10]*segment
 
@@ -175,7 +175,7 @@ func main() {
 			//fmt.Printf("    被删除的数量：%d 总的访问频率(1w分钟访问次数):%d (%d-%d) \n", count, getRate,totalGetCount, totalTime)
 			//fmt.Printf(" ==================================== \n")
 		case 2:
-			fmt.Println(c.GetQueueCount())
+			fmt.Println(objectCache.GetQueueCount())
 		case 3:
 			traceMemStats()
 		default:

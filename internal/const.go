@@ -1,6 +1,8 @@
 package internal
 
 const(
+	DefaultKeySize = 50
+
 	// controller中restQueue的个数
 	LevelSize = 10
 
