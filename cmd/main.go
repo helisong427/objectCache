@@ -103,6 +103,8 @@ func (s *segment) start() {
 
 // 模拟随机读写场景，观察淘汰情况
 func main() {
+
+
 	go func() {
 		http.ListenAndServe("localhost:13001", nil)
 	}()

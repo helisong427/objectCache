@@ -98,14 +98,14 @@ func del(key []byte) (ok bool) {
 	return ok
 }
 
-//set 缓存字符切片为键值的对象，当存储的类型不匹配返回错误。使用默认 _DefaultTopic_
+//set 缓存字符切片为键值的对象。使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
 func Set(key []byte, obj interface{}, expireSecond int) (ok bool) {
 	key = append(key, defaultTopic...)
 	return set(key, obj, expireSecond)
 }
 
-// SetInt 缓存一个以int型KEY的对象，当存储的类型不匹配返回错误。使用默认 _DefaultTopic_
+// SetInt 缓存一个以int型KEY的对象。使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
 func SetInt(key int64, obj interface{}, expireSecond int) (ok bool) {
 	var bKey [internal.DefaultKeySize]byte
@@ -146,7 +146,7 @@ func DelInt(key int64) (ok bool) {
 	return Del(bKey[:])
 }
 
-//SetByTopic 缓存字符切片为键值的对象，当存储的类型不匹配返回错误。topic为空则使用默认 _DefaultTopic_
+//SetByTopic 缓存字符切片为键值的对象，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
 func SetByTopic(topic string, key []byte, obj interface{}, expireSecond int) (ok bool) {
 	if topic == ""{
@@ -158,7 +158,7 @@ func SetByTopic(topic string, key []byte, obj interface{}, expireSecond int) (ok
 	return set(key, obj, expireSecond)
 }
 
-// SetInt 缓存一个以int型KEY的对象，当存储的类型不匹配返回错误。topic为空则使用默认 _DefaultTopic_
+// SetInt 缓存一个以int型KEY的对象，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
 func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) (ok bool) {
 	var bKey [internal.DefaultKeySize]byte
@@ -173,7 +173,7 @@ func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) (
 	return set(hashKey, obj, expireSecond)
 }
 
-//Get 根据字符切片型键值获取对象。topic为空则使用默认 _DefaultTopic_
+//Get 根据字符切片型键值获取对象，当对象不存在返回false。topic为空则使用默认 _DefaultTopic_
 //ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetByTopic(topic string, key []byte) (obj interface{}, ok bool) {
 	if topic == ""{
