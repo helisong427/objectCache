@@ -5,13 +5,19 @@ import (
 )
 
 const (
-	queueNodeSize = 5000
+	queueNodeSize = 10000
 )
 
 // queue底层用数组实现的队列，固定大小为queueNodeSize
 type queue struct {
 	head, tail int
 	queue      [queueNodeSize]*internal.Node
+}
+
+//pushBack 从队列尾部入队列。
+func (q *queue) reset() {
+	q.head = 0
+	q.tail = 0
 }
 
 //pushBack 从队列尾部入队列。

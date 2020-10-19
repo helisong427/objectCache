@@ -1,31 +1,30 @@
 package controller
 
 import (
+	"container/list"
 	"objectCache/internal"
-)
-
-const (
-	defaultQueueLen = 10
 )
 
 //休息队列，由多个queue构成一个可伸缩队列
 type restQueue struct {
 	restTime uint32 //休息时长，单位为秒
 	count    int32
-	queues   []*queue
+	queueList *list.List
 }
 
 func newRestQueue(restTime uint32) (q *restQueue) {
 
 	q = &restQueue{
 		restTime: restTime,
-		queues:   make([]*queue, 0, defaultQueueLen),
+		queueList: list.New(),
 	}
 
-	q.queues = append(q.queues, &queue{})
+	q.queueList.PushBack(queueCacheObj.getQueue())
 
 	return q
 }
+
+
 
 func (s *restQueue) setRestTime(t uint32) {
 	s.restTime = t
@@ -36,35 +35,35 @@ func (s *restQueue) getExpireNodes(now uint32, n []*internal.Node) (nodes []*int
 
 	expireTime := now - s.restTime
 	var isEnd bool
-	for range s.queues {
-		n, isEnd = s.queues[0].fronts(expireTime, n)
-
+	var q *queue
+	for i := s.queueList.Front(); i != nil; i = i.Next() {
+		q = i.Value.(*queue)
+		n, isEnd = q.fronts(expireTime, n)
 		if isEnd {
+			q.reset()
 
-			if len(s.queues) == 1{
-				s.queues[0].head = 0
-				s.queues[0].tail = 0
+			if s.queueList.Len() == 1{
 				break
 			}
 
-			s.queues = s.queues[1:]
-		} else {
+			s.queueList.Remove(i)
+			queueCacheObj.setQueue(q)
+		}else{
 			break
 		}
+
 	}
-
 	s.count = s.count - int32(len(n))
-
 	return n
 }
 
 // addNode 添加一个node到末尾
 func (s *restQueue) addNode(n *internal.Node) {
 
-	if !s.queues[len(s.queues)-1].pushBack(n) {
-		s.queues = append(s.queues, &queue{})
+	if !s.queueList.Back().Value.(*queue).pushBack(n) {
+		s.queueList.PushBack(queueCacheObj.getQueue())
 		s.addNode(n)
-	} else {
+	}else{
 		s.count++
 	}
 

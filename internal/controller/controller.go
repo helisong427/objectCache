@@ -42,7 +42,7 @@ import (
 */
 type Controller struct {
 	// 用于接收用户存储对象时的node，由于sliceChannel是一个不限定容量的channel，这样用户在高并发下也不会由于channel容量占满而被阻塞。
-	sliceChannel *internal.SliceChannel
+	unlimitedChannel *internal.UnlimitedChannel
 
 	maxCount      int32 //用户设置的最大对象数量
 	restNodeCount int32 //在restQueue队列中的对象数量
@@ -61,18 +61,20 @@ type Controller struct {
 	//destroyQueue 删除队列，不会做稳定性判断，如果访问率有增加则添加到levelQueue的1级队列，如果没有增加则确定淘汰对象。
 	destroyQueue *restQueue
 
+
+
 	updateTotalBeginTime int64
 }
 
 func NewController(maxCount int32, segment *[storage.MaxSegmentSize]*storage.Storage,
 	nodeCache *internal.NodeCache) (c *Controller) {
 	c = &Controller{
-		sliceChannel: internal.NewSliceChannel(),
-		maxCount:     maxCount,
-		segment:      segment,
-		nodeCache:    nodeCache,
-		destroyQueue: newRestQueue(uint32(internal.LevelRestStep)),
-		initialQueue: newRestQueue(uint32(internal.LevelRestStep)),
+		unlimitedChannel:     internal.NewUnlimitedChannel(),
+		maxCount:             maxCount,
+		segment:              segment,
+		nodeCache:            nodeCache,
+		destroyQueue:         newRestQueue(uint32(internal.LevelRestStep)),
+		initialQueue:         newRestQueue(uint32(internal.LevelRestStep)),
 		updateTotalBeginTime: time.Now().Unix(),
 	}
 
@@ -87,7 +89,7 @@ func NewController(maxCount int32, segment *[storage.MaxSegmentSize]*storage.Sto
 }
 
 func (c *Controller) AddNode(n *internal.Node) {
-	c.sliceChannel.SetNode(n)
+	c.unlimitedChannel.SetNode(n)
 }
 
 func (c *Controller) setTotalCountAndTotalTime(currentCount, currentTime uint32) {
@@ -271,7 +273,7 @@ func (c *Controller) handle() {
 			//fmt.Print("\n")
 		default:
 
-			node, ok := c.sliceChannel.GetNode()
+			node, ok := c.unlimitedChannel.GetNode()
 			if ok {
 				//fmt.Printf("%s addNode: user ==> init, key:%d\n",time.Now().Format("15:04:05"), node.Hash)
 				node.UpdateNodeData(0)

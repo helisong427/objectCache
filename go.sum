@@ -1,2 +1,4 @@
+github.com/arl/statsviz v0.1.1 h1:BLJ5hIN3Sf1cWtJ6YhMt0WH41+Z6LBmHG8YXJDJpGl8=
+github.com/arl/statsviz v0.1.1/go.mod h1:Dg/DhcWPSzBVk70gVbZWcymzHDkYRhVpeScx5l+Zj7o=
 github.com/cespare/xxhash/v2 v2.1.1 h1:6MnRN8NT7+YBpUIWxHtefFZOKTAPgGjpQSxqLNn0+qY=
 github.com/cespare/xxhash/v2 v2.1.1/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
