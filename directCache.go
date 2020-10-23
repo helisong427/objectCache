@@ -9,13 +9,13 @@ import (
 )
 
 // setDirect 不纳入淘汰管理，直接存储
-func setDirect(key []byte, obj interface{}, expireSecond int) (ok bool) {
+func setDirect(key []byte, obj interface{}, expireSecond int) {
 
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
 
 	n := c.nodeCache.GetNode()
-	ok = c.segments[segID].Set(obj, hashVal, expireSecond, n)
+	ok := c.segments[segID].Set(obj, hashVal, expireSecond, n)
 	if !ok {
 		c.nodeCache.SaveNode(n)
 	}
@@ -58,17 +58,17 @@ func delDirect(key []byte) (ok bool) {
 
 //set 缓存字符切片为键值的对象，不纳入淘汰管理。使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetDirect(key []byte, obj interface{}, expireSecond int) (ok bool) {
+func SetDirect(key []byte, obj interface{}, expireSecond int) {
 	key = append(key, defaultTopic...)
-	return setDirect(key, obj, expireSecond)
+	setDirect(key, obj, expireSecond)
 }
 
 // SetInt 缓存一个以int型KEY的对象，不纳入淘汰管理，不纳入淘汰管理。使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetIntDirect(key int64, obj interface{}, expireSecond int) (ok bool) {
+func SetIntDirect(key int64, obj interface{}, expireSecond int) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
-	return SetDirect(bKey[:], obj, expireSecond)
+	SetDirect(bKey[:], obj, expireSecond)
 }
 
 //Get 根据字符切片型键值获取对象，不纳入淘汰管理。使用默认 _DefaultTopic_
@@ -106,19 +106,19 @@ func DelIntDirect(key int64) (ok bool) {
 
 //SetByTopic 缓存字符切片为键值的对象，不纳入淘汰管理，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetDirectByTopic(topic string, key []byte, obj interface{}, expireSecond int) (ok bool) {
+func SetDirectByTopic(topic string, key []byte, obj interface{}, expireSecond int) {
 	if topic == ""{
 		key = append(key, defaultTopic...)
 	}else{
 		key = append(key, internal.String2Bytes(topic)...)
 	}
 
-	return setDirect(key, obj, expireSecond)
+	setDirect(key, obj, expireSecond)
 }
 
 // SetInt 缓存一个以int型KEY的对象，不纳入淘汰管理，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetIntDirectByTopic(topic string, key int64, obj interface{}, expireSecond int) (ok bool) {
+func SetIntDirectByTopic(topic string, key int64, obj interface{}, expireSecond int) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
 	var hashKey []byte
@@ -128,7 +128,7 @@ func SetIntDirectByTopic(topic string, key int64, obj interface{}, expireSecond 
 		hashKey = append(bKey[:], internal.String2Bytes(topic)...)
 	}
 
-	return setDirect(hashKey, obj, expireSecond)
+	setDirect(hashKey, obj, expireSecond)
 }
 
 //Get 根据字符切片型键值获取对象，不纳入淘汰管理，当对象不存在返回false。topic为空则使用默认 _DefaultTopic_

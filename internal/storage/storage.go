@@ -28,13 +28,18 @@ func (s *Storage) Set(obj interface{}, hash uint64, expire int, n *internal.Node
 		n.TotalTime = 0
 		n.InitReadCount()
 		n.LastReadTime = uint32(now.Unix()) - internal.NodeUnitRestTime
-		if expire > 0 {
-			n.Expire = uint32(now.Add(time.Second * time.Duration(expire)).Unix())
-		}else{
-			n.Expire = math.MaxUint32 // 2106-02-07 14:28:15 +0800 CST
-		}
 		s.NodeMap[n.Hash] = n
+	}else{
+		s.NodeMap[hash].Obj = n.Obj
+		_ = s.NodeMap[hash].IncrementReadCount()
 	}
+
+	if expire > 0 {
+		s.NodeMap[hash].Expire = uint32(now.Add(time.Second * time.Duration(expire)).Unix())
+	}else{
+		s.NodeMap[hash].Expire = math.MaxUint32 // 2106-02-07 14:28:15 +0800 CST
+	}
+
 	s.Unlock()
 	return !ok
 }

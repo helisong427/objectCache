@@ -51,19 +51,18 @@ func InitDefaultObjectCache() {
 	InitObjectCache(0)
 }
 
-func set(key []byte, obj interface{}, expireSecond int) (ok bool) {
+func set(key []byte, obj interface{}, expireSecond int) {
 
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
 
 	n := c.nodeCache.GetNode()
-	ok = c.segments[segID].Set(obj, hashVal, expireSecond, n)
+	ok := c.segments[segID].Set(obj, hashVal, expireSecond, n)
 	if ok {
 		c.controller.AddNode(n)
 	} else {
 		c.nodeCache.SaveNode(n)
 	}
-	return
 }
 
 func get(key []byte) (obj interface{}, ok bool) {
@@ -100,17 +99,17 @@ func del(key []byte) (ok bool) {
 
 //set 缓存字符切片为键值的对象。使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func Set(key []byte, obj interface{}, expireSecond int) (ok bool) {
+func Set(key []byte, obj interface{}, expireSecond int){
 	key = append(key, defaultTopic...)
-	return set(key, obj, expireSecond)
+	set(key, obj, expireSecond)
 }
 
 // SetInt 缓存一个以int型KEY的对象。使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetInt(key int64, obj interface{}, expireSecond int) (ok bool) {
+func SetInt(key int64, obj interface{}, expireSecond int) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
-	return Set(bKey[:], obj, expireSecond)
+	Set(bKey[:], obj, expireSecond)
 }
 
 //Get 根据字符切片型键值获取对象。使用默认 _DefaultTopic_
@@ -148,19 +147,19 @@ func DelInt(key int64) (ok bool) {
 
 //SetByTopic 缓存字符切片为键值的对象，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetByTopic(topic string, key []byte, obj interface{}, expireSecond int) (ok bool) {
+func SetByTopic(topic string, key []byte, obj interface{}, expireSecond int) {
 	if topic == ""{
 		key = append(key, defaultTopic...)
 	}else{
 		key = append(key, internal.String2Bytes(topic)...)
 	}
 
-	return set(key, obj, expireSecond)
+	set(key, obj, expireSecond)
 }
 
 // SetInt 缓存一个以int型KEY的对象，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
 // key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) (ok bool) {
+func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
 	var hashKey []byte
@@ -170,7 +169,7 @@ func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) (
 		hashKey = append(bKey[:], internal.String2Bytes(topic)...)
 	}
 
-	return set(hashKey, obj, expireSecond)
+	set(hashKey, obj, expireSecond)
 }
 
 //Get 根据字符切片型键值获取对象，当对象不存在返回false。topic为空则使用默认 _DefaultTopic_

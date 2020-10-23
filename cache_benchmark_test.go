@@ -27,7 +27,7 @@ func init() {
 func initCache() {
 	InitObjectCache(65535*200)
 	for i := 0; i < 60000000; i++{
-		_ = SetInt(int64(i), &dataDemo{
+		SetInt(int64(i), &dataDemo{
 			id: i,
 			name: "haha",
 		}, 10)
@@ -81,7 +81,7 @@ func BenchmarkCache_Set(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		key := fmt.Sprintf("%d", i)
-		_ = Set([]byte(key), &dataDemo{
+		Set([]byte(key), &dataDemo{
 			id: i,
 			name: "haha",
 		}, 10)
@@ -140,7 +140,7 @@ func BenchmarkSyncCache_Set(b *testing.B) {
 		for pb.Next() {
 			id := rand.Int63()
 			//key := fmt.Sprintf("%d", id)
-			_ = SetInt(id, &dataDemo{
+			SetInt(id, &dataDemo{
 				id: int(id),
 				name: "haha",
 			}, 10)
