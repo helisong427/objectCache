@@ -7,7 +7,7 @@ import (
 )
 
 type data struct {
-	id int
+	id   int
 	name string
 }
 
@@ -16,15 +16,14 @@ func TestStorage_Total(t *testing.T) {
 	nc := internal.NewNodeCache(1000)
 	s := Storage{NodeMap: make(map[uint64]*internal.Node)}
 
-	//set
+	// set
 	for i := 0; i < 100; i++ {
-		if !s.Set(data{id:i, name:"aa"}, uint64(i), 0, nc.GetNode()) {
+		if !s.Set(data{id: i, name: "aa"}, uint64(i), 0, nc.GetNode()) {
 			t.Error("失败1")
 		}
 	}
 
-
-	//get
+	// get
 	for i := 0; i < 100; i++ {
 		n, ok := s.Get(uint64(i))
 		if !ok {
@@ -36,23 +35,22 @@ func TestStorage_Total(t *testing.T) {
 			t.Error("失败3")
 		}
 
-		if n.GetCurrentCount() != 1{
+		if n.GetCurrentCount() != 1 {
 			t.Error("失败4")
 		}
 	}
-	time.Sleep(time.Second*20)
+	time.Sleep(time.Second * 20)
 	n, ok := s.Get(uint64(10))
 	if !ok {
 		t.Error("失败5")
 	}
-	if n.GetCurrentCount() != 2{
+	if n.GetCurrentCount() != 2 {
 		t.Error("失败6")
 	}
 
-
-	//del
+	// del
 	n, ok = s.Del(10)
-	if !ok{
+	if !ok {
 		t.Error("失败7")
 	}
 
@@ -64,7 +62,7 @@ func TestStorage_Total(t *testing.T) {
 	n.Hash = 0
 
 	n, ok = s.Del(10)
-	if ok{
+	if ok {
 		t.Error("失败9")
 	}
 

@@ -14,13 +14,13 @@ type queue struct {
 	queue      [queueNodeSize]*internal.Node
 }
 
-//pushBack 从队列尾部入队列。
+// pushBack 从队列尾部入队列。
 func (q *queue) reset() {
 	q.head = 0
 	q.tail = 0
 }
 
-//pushBack 从队列尾部入队列。
+// pushBack 从队列尾部入队列。
 func (q *queue) pushBack(n *internal.Node) (ok bool) {
 	if q.tail >= queueNodeSize {
 		return false
@@ -33,7 +33,7 @@ func (q *queue) pushBack(n *internal.Node) (ok bool) {
 	return true
 }
 
-//getExpireNodes 从队列头部出队列，一次性把到期的都读出来。
+// getExpireNodes 从队列头部出队列，一次性把到期的都读出来。
 // 返回值isEnd为是否读取到末尾
 // 参数expireTime是到期时间
 // 参数n是缓存结果的node切片，防止对象逃逸
@@ -41,9 +41,9 @@ func (q *queue) fronts(expireTime uint32, n []*internal.Node) (nodes []*internal
 
 	var ii int
 	for ; q.head < q.tail; {
-		//fmt.Println(expireTime, q.queue[q.head].RestBeginTime)
+		// fmt.Println(expireTime, q.queue[q.head].RestBeginTime)
 		if expireTime >= q.queue[q.head].RestBeginTime {
-			//fmt.Printf("fronts ==> now:%d > RestBeginTime:%d \n", expireTime, q.queue[q.head].RestBeginTime)
+			// fmt.Printf("fronts ==> now:%d > RestBeginTime:%d \n", expireTime, q.queue[q.head].RestBeginTime)
 			n = append(n, q.queue[q.head])
 			q.queue[q.head] = nil
 			ii++

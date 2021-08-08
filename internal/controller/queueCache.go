@@ -4,7 +4,6 @@ type queueCache struct {
 	cache chan *queue
 }
 
-
 var queueCacheObj = queueCache{cache: make(chan *queue, 100)}
 
 func (s *queueCache) getQueue() (q *queue) {

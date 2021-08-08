@@ -5,17 +5,17 @@ import (
 	"objectCache/internal"
 )
 
-//休息队列，由多个queue构成一个可伸缩队列
+// 休息队列，由多个queue构成一个可伸缩队列
 type restQueue struct {
-	restTime uint32 //休息时长，单位为秒
-	count    int32
+	restTime  uint32 // 休息时长，单位为秒
+	count     int32
 	queueList *list.List
 }
 
 func newRestQueue(restTime uint32) (q *restQueue) {
 
 	q = &restQueue{
-		restTime: restTime,
+		restTime:  restTime,
 		queueList: list.New(),
 	}
 
@@ -23,8 +23,6 @@ func newRestQueue(restTime uint32) (q *restQueue) {
 
 	return q
 }
-
-
 
 func (s *restQueue) setRestTime(t uint32) {
 	s.restTime = t
@@ -42,13 +40,13 @@ func (s *restQueue) getExpireNodes(now uint32, n []*internal.Node) (nodes []*int
 		if isEnd {
 			q.reset()
 
-			if s.queueList.Len() == 1{
+			if s.queueList.Len() == 1 {
 				break
 			}
 
 			s.queueList.Remove(i)
 			queueCacheObj.setQueue(q)
-		}else{
+		} else {
 			break
 		}
 
@@ -63,7 +61,7 @@ func (s *restQueue) addNode(n *internal.Node) {
 	if !s.queueList.Back().Value.(*queue).pushBack(n) {
 		s.queueList.PushBack(queueCacheObj.getQueue())
 		s.addNode(n)
-	}else{
+	} else {
 		s.count++
 	}
 

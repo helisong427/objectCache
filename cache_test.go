@@ -7,7 +7,7 @@ import (
 )
 
 type testData struct {
-	id int
+	id   int
 	name string
 }
 
@@ -19,11 +19,10 @@ func ExampleNewCache() {
 	// 0
 }
 
-
 func ExampleCache_SetAndGet() {
 	objectCache.InitDefaultObjectCache()
 
-	d := testData{id: 100,name: "test1"}
+	d := testData{id: 100, name: "test1"}
 
 	objectCache.Set([]byte("test1"), d, 0)
 
@@ -40,7 +39,7 @@ func ExampleCache_SetAndGet() {
 func ExampleCache_SetIntAndGetInt() {
 	objectCache.InitDefaultObjectCache()
 
-	d := testData{id: 1001,name: "SetIntAndGetInt"}
+	d := testData{id: 1001, name: "SetIntAndGetInt"}
 
 	objectCache.SetInt(1001, d, 0)
 
@@ -57,15 +56,15 @@ func ExampleCache_SetIntAndGetInt() {
 func ExampleCache_SetExpire() {
 	objectCache.InitDefaultObjectCache()
 
-	d := testData{id: 1002,name: "SetExpire"}
+	d := testData{id: 1002, name: "SetExpire"}
 
 	objectCache.SetInt(1002, d, 5)
 
-	time.Sleep(time.Second*6)
+	time.Sleep(time.Second * 6)
 	obj, ok := objectCache.GetInt(1002)
 	if ok {
 		fmt.Println(obj.(testData).name)
-	}else{
+	} else {
 		fmt.Println("get failed")
 	}
 
@@ -74,13 +73,10 @@ func ExampleCache_SetExpire() {
 
 }
 
-
-
-
 func ExampleCache_SetAndGetByTopic() {
 	objectCache.InitDefaultObjectCache()
 
-	d := testData{id: 1005,name: "SetAndGetByTopic"}
+	d := testData{id: 1005, name: "SetAndGetByTopic"}
 
 	objectCache.SetByTopic("exampleTest", []byte("SetAndGetByTopic"), d, 0)
 
@@ -97,7 +93,7 @@ func ExampleCache_SetAndGetByTopic() {
 func ExampleCache_SetIntAndGetIntByTopic() {
 	objectCache.InitDefaultObjectCache()
 
-	d := testData{id: 1004,name: "SetIntAndGetIntByTopic"}
+	d := testData{id: 1004, name: "SetIntAndGetIntByTopic"}
 
 	objectCache.SetIntByTopic("exampleTest", 1004, d, 0)
 
@@ -114,15 +110,15 @@ func ExampleCache_SetIntAndGetIntByTopic() {
 func ExampleCache_SetExpireByTopic() {
 	objectCache.InitDefaultObjectCache()
 
-	d := testData{id: 1003,name: "SetExpireByTopic"}
+	d := testData{id: 1003, name: "SetExpireByTopic"}
 
 	objectCache.SetIntByTopic("exampleTest", 1003, d, 5)
 
-	time.Sleep(time.Second*6)
+	time.Sleep(time.Second * 6)
 	obj, ok := objectCache.GetIntByTopic("exampleTest", 1003)
 	if ok {
 		fmt.Println(obj.(testData).name)
-	}else{
+	} else {
 		fmt.Println("get failed")
 	}
 
@@ -130,5 +126,3 @@ func ExampleCache_SetExpireByTopic() {
 	// get failed
 
 }
-
-

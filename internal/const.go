@@ -1,6 +1,6 @@
 package internal
 
-const(
+const (
 	DefaultKeySize = 50
 
 	// controller中restQueue的个数

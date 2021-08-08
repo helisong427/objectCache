@@ -5,12 +5,11 @@ import (
 	"time"
 )
 
-
 func TestUnlimitedChannel_Total(t *testing.T) {
 
 	sc := NewUnlimitedChannel()
 
-	for i := 0; i <100000; i++ {
+	for i := 0; i < 100000; i++ {
 		sc.SetNode(&Node{
 			Hash: uint64(i),
 		})
@@ -21,7 +20,7 @@ func TestUnlimitedChannel_Total(t *testing.T) {
 		if !ok {
 			t.Error("失败1")
 		}
-		if node.Hash != uint64(i){
+		if node.Hash != uint64(i) {
 			t.Error("失败2")
 		}
 	}
@@ -30,35 +29,34 @@ func TestUnlimitedChannel_Total(t *testing.T) {
 		t.Error("失败3")
 	}
 
-	for i := 0; i <100000; i++ {
+	for i := 0; i < 100000; i++ {
 		sc.SetNode(&Node{
 			Hash: uint64(i),
 		})
 	}
 
-
 }
 
 var sc = NewUnlimitedChannel()
 
-func set(t *testing.T){
+func set(t *testing.T) {
 	t.Parallel()
 	for i := 0; i < 10000000; i++ {
 		sc.SetNode(&Node{})
-		//time.Sleep(time.Microsecond*100)
+		// time.Sleep(time.Microsecond*100)
 	}
 }
 
-func get(t *testing.T){
+func get(t *testing.T) {
 	t.Parallel()
 	var count uint64
-	for{
+	for {
 		_, ok := sc.GetNode()
 		if ok {
 			count++
 		}
 
-		if count == 40000000{
+		if count == 40000000 {
 			time.Sleep(time.Millisecond)
 			_, ok := sc.GetNode()
 			if ok {
@@ -67,11 +65,10 @@ func get(t *testing.T){
 
 			break
 		}
-		//time.Sleep(time.Microsecond*100)
+		// time.Sleep(time.Microsecond*100)
 	}
 	t.Logf("count:%d", count)
 }
-
 
 func TestUnlimitedChannel_SyncGetAndSet(t *testing.T) {
 

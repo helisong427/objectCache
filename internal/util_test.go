@@ -9,8 +9,6 @@ func TestHashFunc(t *testing.T) {
 
 }
 
-
-
 func TestBytes2String(t *testing.T) {
 	type args struct {
 		b []byte
@@ -20,9 +18,9 @@ func TestBytes2String(t *testing.T) {
 		args args
 		want string
 	}{
-		{"1", args{[]byte("aaaaa")}, "aaaaa" },
-		{"2", args{[]byte("")}, "" },
-		{"3", args{[]byte("b")}, "b" },
+		{"1", args{[]byte("aaaaa")}, "aaaaa"},
+		{"2", args{[]byte("")}, ""},
+		{"3", args{[]byte("b")}, "b"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -32,7 +30,6 @@ func TestBytes2String(t *testing.T) {
 		})
 	}
 }
-
 
 func TestString2Bytes(t *testing.T) {
 	type args struct {

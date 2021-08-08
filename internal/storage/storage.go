@@ -29,14 +29,14 @@ func (s *Storage) Set(obj interface{}, hash uint64, expire int, n *internal.Node
 		n.InitReadCount()
 		n.LastReadTime = uint32(now.Unix()) - internal.NodeUnitRestTime
 		s.NodeMap[n.Hash] = n
-	}else{
+	} else {
 		s.NodeMap[hash].Obj = n.Obj
 		_ = s.NodeMap[hash].IncrementReadCount()
 	}
 
 	if expire > 0 {
 		s.NodeMap[hash].Expire = uint32(now.Add(time.Second * time.Duration(expire)).Unix())
-	}else{
+	} else {
 		s.NodeMap[hash].Expire = math.MaxUint32 // 2106-02-07 14:28:15 +0800 CST
 	}
 
@@ -58,7 +58,7 @@ func (s *Storage) Del(hash uint64) (n *internal.Node, ok bool) {
 	s.Lock()
 	if n, ok = s.NodeMap[hash]; ok {
 		delete(s.NodeMap, hash)
-		//释放存储对象，controller会对其进行检查，判断此对象是否被主动删除
+		// 释放存储对象，controller会对其进行检查，判断此对象是否被主动删除
 		n.Obj = nil
 	}
 	s.Unlock()

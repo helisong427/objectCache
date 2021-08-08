@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-
 func Test_restQueue_Total(t *testing.T) {
 
 	rq := newRestQueue(10)
@@ -17,7 +16,7 @@ func Test_restQueue_Total(t *testing.T) {
 	nodes := make([]*internal.Node, 0, 10)
 
 	nodes = rq.getExpireNodes(uint32(time.Now().Unix()), nodes)
-	if len(nodes) > 0{
+	if len(nodes) > 0 {
 		t.Error("失败1")
 	}
 
@@ -26,7 +25,7 @@ func Test_restQueue_Total(t *testing.T) {
 	time.Sleep(time.Second)
 	nodes = nodes[0:0]
 	nodes = rq.getExpireNodes(uint32(time.Now().Unix()), nodes)
-	if len(nodes) != 1{
+	if len(nodes) != 1 {
 		t.Error("失败2")
 	}
 
@@ -39,7 +38,7 @@ func Test_restQueue_Total1(t *testing.T) {
 	nodes := make([]*internal.Node, 0, 10)
 
 	nodes = rq.getExpireNodes(uint32(time.Now().Unix()), nodes)
-	if len(nodes) > 0{
+	if len(nodes) > 0 {
 		t.Error("失败1")
 	}
 
@@ -49,7 +48,7 @@ func Test_restQueue_Total1(t *testing.T) {
 		rq.addNode(node)
 	}
 
-	if rq.count != 10000{
+	if rq.count != 10000 {
 		t.Error("失败2")
 	}
 
@@ -58,7 +57,7 @@ func Test_restQueue_Total1(t *testing.T) {
 
 	nodes = nodes[0:0]
 	nodes = rq.getExpireNodes(uint32(time.Now().Unix()), nodes)
-	if len(nodes) != 10000{
+	if len(nodes) != 10000 {
 		t.Error("失败3")
 	}
 
