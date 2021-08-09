@@ -90,8 +90,8 @@ func (c *Controller) updateData(currentCount, currentTime uint32) {
 		cacheAverageQf := (c.TotalCount * internal.ScaleFactor * internal.NodeUnitRestTime) / c.TotalTime
 		fmt.Printf("cache等比例缩放%d(%d-%d) ==>", cacheAverageQf, c.TotalTime, c.TotalCount)
 
-		c.TotalCount = c.TotalCount/2 + uint64(currentCount)
-		c.TotalTime = c.TotalTime/2 + uint64(currentTime)
+		c.TotalCount = c.TotalCount/10 + uint64(currentCount)
+		c.TotalTime = c.TotalTime/10 + uint64(currentTime)
 		cacheAverageQf = (c.TotalCount * internal.ScaleFactor * internal.NodeUnitRestTime) / c.TotalTime
 		fmt.Printf("%d(%d-%d) %s \n", cacheAverageQf, c.TotalTime, c.TotalCount, c.GetQueueCount())
 		c.updateTotalBeginTime = now
@@ -272,7 +272,7 @@ func (c *Controller) initialQueueHandle(nodes []*internal.Node, now uint32) {
 
 	for k, _ := range nodes {
 
-		if c.directEliminate(nodes[k], now) {
+		if c.directEliminate(nodes[k]) {
 			// fmt.Printf("init\n")
 			continue
 		}
@@ -315,7 +315,7 @@ func (c *Controller) restQueueHandle(nodes []*internal.Node, now uint32) {
 		nodes = c.restQueue[k].getExpireNodes(now, nodes)
 
 		for kk, _ := range nodes {
-			if c.directEliminate(nodes[kk], now) {
+			if c.directEliminate(nodes[kk]) {
 				// fmt.Printf("%d\n", k)
 				c.restNodeCount--
 				continue
@@ -343,7 +343,7 @@ func (c *Controller) destroyQueueHandle(nodes []*internal.Node, now uint32) {
 	// var deleteCount = c.maxCount - c.restNodeCount - c.destroyQueue.count
 	for k, _ := range nodes {
 
-		if c.directEliminate(nodes[k], now) {
+		if c.directEliminate(nodes[k]) {
 			// fmt.Printf("destroy\n")
 			continue
 		}
@@ -391,8 +391,8 @@ func (c *Controller) destroyQueueHandle(nodes []*internal.Node, now uint32) {
 	}
 }
 
-// directEliminate 进行直接淘汰：1、被外部删除；2、对象过期。
-func (c *Controller) directEliminate(node *internal.Node, now uint32) (ok bool) {
+// directEliminate 进行直接淘汰：1、被外部删除。
+func (c *Controller) directEliminate(node *internal.Node) (ok bool) {
 	// 被用户主动删除，直接丢弃
 	if node.Obj == nil {
 		// 此处清除hash，作为recoverNode()进行判断的依据
@@ -400,17 +400,6 @@ func (c *Controller) directEliminate(node *internal.Node, now uint32) (ok bool) 
 
 		// fmt.Printf("directEliminate==> 用户删除 key: %d-", node.Hash)
 
-		return true
-	}
-	// 过期，直接调用接口删除
-	if now >= node.Expire {
-		_, ok := c.segment[node.Hash%storage.MaxSegmentSize].Del(node.Hash)
-		if ok {
-			c.nodeCache.SaveNode(node)
-		} else {
-			node.Hash = 0
-		}
-		// fmt.Printf("directEliminate==> 过期    key: %d-", node.Hash)
 		return true
 	}
 

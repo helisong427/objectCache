@@ -51,7 +51,7 @@ func (s *segment) setData() (se *segment) {
 	var i int64
 	for i = s.begin; i <= s.end; i++ {
 		data := Data{Id: i}
-		objectCache.SetInt(i, data, 0)
+		objectCache.SetInt(i, data)
 		s.data[i-s.begin] = i
 		s.dataTail++
 	}

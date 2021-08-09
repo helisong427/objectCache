@@ -18,7 +18,7 @@ func TestStorage_Total(t *testing.T) {
 
 	// set
 	for i := 0; i < 100; i++ {
-		if !s.Set(data{id: i, name: "aa"}, uint64(i), 0, nc.GetNode()) {
+		if !s.Set(data{id: i, name: "aa"}, uint64(i), nc.GetNode()) {
 			t.Error("失败1")
 		}
 	}

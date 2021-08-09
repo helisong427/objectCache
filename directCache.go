@@ -2,22 +2,20 @@ package objectCache
 
 import (
 	"encoding/binary"
-	"math"
 	"objectCache/internal"
 	"objectCache/internal/storage"
-	"time"
 )
 
 // setDirect 不纳入淘汰管理，直接存储
-func setDirect(key []byte, obj interface{}, expireSecond int) {
+func setDirect(key []byte, obj interface{}) {
 
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
 
-	n := cache.nodeCache.GetNode()
-	ok := cache.segments[segID].Set(obj, hashVal, expireSecond, n)
+	node := cache.nodeCache.GetNode()
+	ok := cache.segments[segID].Set(obj, hashVal, node)
 	if !ok {
-		cache.nodeCache.SaveNode(n)
+		cache.nodeCache.SaveNode(node)
 	}
 	return
 }
@@ -30,15 +28,6 @@ func getDirect(key []byte) (obj interface{}, ok bool) {
 	if !ok {
 		return nil, false
 	}
-
-	if node.Expire != math.MaxUint32 && uint32(time.Now().Unix()) > node.Expire {
-		n, ok := cache.segments[segID].Del(hashVal)
-		if ok {
-			cache.nodeCache.SaveNode(n)
-		}
-		return nil, false
-	}
-
 	return node.Obj, ok
 }
 
@@ -46,40 +35,36 @@ func getDirect(key []byte) (obj interface{}, ok bool) {
 func delDirect(key []byte) (ok bool) {
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
-	var n *internal.Node
+	var node *internal.Node
 
-	n, ok = cache.segments[segID].Del(hashVal)
+	node, ok = cache.segments[segID].Del(hashVal)
 	if ok {
-		cache.nodeCache.SaveNode(n)
+		cache.nodeCache.SaveNode(node)
 	}
 
 	return ok
 }
 
 // set 缓存字符切片为键值的对象，不纳入淘汰管理。使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetDirect(key []byte, obj interface{}, expireSecond int) {
+func SetDirect(key []byte, obj interface{}) {
 	key = append(key, defaultTopic...)
-	setDirect(key, obj, expireSecond)
+	setDirect(key, obj)
 }
 
 // SetInt 缓存一个以int型KEY的对象，不纳入淘汰管理，不纳入淘汰管理。使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetIntDirect(key int64, obj interface{}, expireSecond int) {
+func SetIntDirect(key int64, obj interface{}) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
-	SetDirect(bKey[:], obj, expireSecond)
+	SetDirect(bKey[:], obj)
 }
 
 // Get 根据字符切片型键值获取对象，不纳入淘汰管理。使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetDirect(key []byte) (obj interface{}, ok bool) {
 	key = append(key, defaultTopic...)
 	return getDirect(key)
 }
 
 // GetInt 根据int型键值获取对象，不纳入淘汰管理。使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetIntDirect(key int64) (obj interface{}, ok bool) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
@@ -103,20 +88,18 @@ func DelIntDirect(key int64) (ok bool) {
 }
 
 // SetByTopic 缓存字符切片为键值的对象，不纳入淘汰管理，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetDirectByTopic(topic string, key []byte, obj interface{}, expireSecond int) {
+func SetDirectByTopic(topic string, key []byte, obj interface{}) {
 	if topic == "" {
 		key = append(key, defaultTopic...)
 	} else {
 		key = append(key, internal.String2Bytes(topic)...)
 	}
 
-	setDirect(key, obj, expireSecond)
+	setDirect(key, obj)
 }
 
 // SetInt 缓存一个以int型KEY的对象，不纳入淘汰管理，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetIntDirectByTopic(topic string, key int64, obj interface{}, expireSecond int) {
+func SetIntDirectByTopic(topic string, key int64, obj interface{}) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
 	var hashKey []byte
@@ -126,11 +109,10 @@ func SetIntDirectByTopic(topic string, key int64, obj interface{}, expireSecond 
 		hashKey = append(bKey[:], internal.String2Bytes(topic)...)
 	}
 
-	setDirect(hashKey, obj, expireSecond)
+	setDirect(hashKey, obj)
 }
 
 // Get 根据字符切片型键值获取对象，不纳入淘汰管理，当对象不存在返回false。topic为空则使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetDirectByTopic(topic string, key []byte) (obj interface{}, ok bool) {
 	if topic == "" {
 		key = append(key, defaultTopic...)

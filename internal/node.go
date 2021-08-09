@@ -5,9 +5,6 @@ import (
 	"time"
 )
 
-func init() {
-
-}
 
 // 存储的基本单元(sizeof = 48)
 type Node struct {
@@ -24,12 +21,8 @@ type Node struct {
 	// node存活时长，单位为秒
 	TotalTime uint32
 
-	// 过期时间，单位为秒，Unix time
-	Expire uint32
-
 	// hash 值
 	Hash uint64
-
 	// 存储的对象
 	Obj interface{}
 }

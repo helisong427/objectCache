@@ -30,7 +30,7 @@ func initCache() {
 		SetInt(int64(i), &dataDemo{
 			id:   i,
 			name: "haha",
-		}, 10)
+		})
 
 	}
 	fmt.Println("init cache end")
@@ -83,7 +83,7 @@ func BenchmarkCache_Set(b *testing.B) {
 		Set([]byte(key), &dataDemo{
 			id:   i,
 			name: "haha",
-		}, 10)
+		})
 	}
 }
 
@@ -139,7 +139,7 @@ func BenchmarkSyncCache_Set(b *testing.B) {
 			SetInt(id, &dataDemo{
 				id:   int(id),
 				name: "haha",
-			}, 10)
+			})
 
 		}
 	})

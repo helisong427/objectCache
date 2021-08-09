@@ -60,4 +60,10 @@ func TestNode_IncrementReadCount(t *testing.T) {
 func Test11(t *testing.T) {
 	fmt.Println(unsafe.Sizeof(uint32(1)))
 	fmt.Println(math.MaxUint16)
+	fmt.Println(time.Now().Unix())
+	var aa uint16
+	aa = 65535
+	fmt.Println(aa)
+	aa++
+	fmt.Println(aa)
 }

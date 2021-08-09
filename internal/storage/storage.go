@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"math"
 	"objectCache/internal"
 	"sync"
 	"time"
@@ -18,7 +17,7 @@ type Storage struct {
 	NodeMap map[uint64]*internal.Node
 }
 
-func (s *Storage) Set(obj interface{}, hash uint64, expire int, node *internal.Node) (ok bool) {
+func (s *Storage) Set(obj interface{}, hash uint64,  node *internal.Node) (ok bool) {
 	s.Lock()
 	defer s.Unlock()
 	var now = time.Now()
@@ -28,13 +27,6 @@ func (s *Storage) Set(obj interface{}, hash uint64, expire int, node *internal.N
 	} else {
 		s.NodeMap[hash].Obj = node.Obj
 		_ = s.NodeMap[hash].IncrementReadCount()
-	}
-
-	if expire > 0 {
-		s.NodeMap[hash].Expire = uint32(now.Add(time.Second * time.Duration(expire)).Unix())
-	} else {
-		// 不过期
-		s.NodeMap[hash].Expire = math.MaxUint32 // 2106-02-07 14:28:15 +0800 CST
 	}
 	return !ok
 }

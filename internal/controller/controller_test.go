@@ -29,7 +29,7 @@ func TestController_1(t *testing.T) {
 
 	node := c.nodeCache.GetNode()
 	var hash = uint64(1)
-	ok := c.segment[hash%storage.MaxSegmentSize].Set(objData{id: 1, name: "1"}, hash, 0, node)
+	ok := c.segment[hash%storage.MaxSegmentSize].Set(objData{id: 1, name: "1"}, hash, node)
 	if ok {
 		c.AddNode(node)
 	}

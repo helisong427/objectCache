@@ -2,12 +2,10 @@ package objectCache
 
 import (
 	"encoding/binary"
-	"math"
 	"objectCache/internal"
 	"objectCache/internal/controller"
 	"objectCache/internal/storage"
 	"sync"
-	"time"
 )
 
 var defaultTopic = []byte("_DefaultTopic_")
@@ -49,13 +47,13 @@ func InitDefaultObjectCache() {
 	InitObjectCache(0)
 }
 
-func set(key []byte, obj interface{}, expireSecond int) {
+func set(key []byte, obj interface{}) {
 
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
 
 	node := cache.nodeCache.GetNode()
-	ok := cache.segments[segID].Set(obj, hashVal, expireSecond, node)
+	ok := cache.segments[segID].Set(obj, hashVal, node)
 	if ok {
 		cache.controller.AddNode(node)
 	} else {
@@ -70,15 +68,6 @@ func get(key []byte) (obj interface{}, ok bool) {
 	if !ok {
 		return nil, false
 	}
-
-	if node.Expire != math.MaxUint32 && uint32(time.Now().Unix()) > node.Expire {
-		node, ok := cache.segments[segID].Del(hashVal)
-		if ok {
-			cache.nodeCache.SaveDirtyNode(node)
-		}
-		return nil, false
-	}
-
 	return node.Obj, ok
 }
 
@@ -96,29 +85,25 @@ func del(key []byte) (ok bool) {
 }
 
 // set 缓存字符切片为键值的对象。使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func Set(key []byte, obj interface{}, expireSecond int) {
+func Set(key []byte, obj interface{}) {
 	key = append(key, defaultTopic...)
-	set(key, obj, expireSecond)
+	set(key, obj)
 }
 
 // SetInt 缓存一个以int型KEY的对象。使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetInt(key int64, obj interface{}, expireSecond int) {
+func SetInt(key int64, obj interface{}) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
-	Set(bKey[:], obj, expireSecond)
+	Set(bKey[:], obj)
 }
 
 // Get 根据字符切片型键值获取对象。使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func Get(key []byte) (obj interface{}, ok bool) {
 	key = append(key, defaultTopic...)
 	return get(key)
 }
 
 // GetInt 根据int型键值获取对象。使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetInt(key int64) (obj interface{}, ok bool) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
@@ -126,7 +111,6 @@ func GetInt(key int64) (obj interface{}, ok bool) {
 }
 
 // Del 根据字符切片的键值删除对象。使用默认 _DefaultTopic_
-// ok返回为false则说明对象删除前已经不存在
 func Del(key []byte) (ok bool) {
 	key = append(key, defaultTopic...)
 
@@ -134,7 +118,6 @@ func Del(key []byte) (ok bool) {
 }
 
 // DelInt 根据int型键值删除对象。使用默认 _DefaultTopic_
-// ok返回为false则说明对象删除前已经不存在
 func DelInt(key int64) (ok bool) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
@@ -142,20 +125,18 @@ func DelInt(key int64) (ok bool) {
 }
 
 // SetByTopic 缓存字符切片为键值的对象，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetByTopic(topic string, key []byte, obj interface{}, expireSecond int) {
+func SetByTopic(topic string, key []byte, obj interface{}) {
 	if topic == "" {
 		key = append(key, defaultTopic...)
 	} else {
 		key = append(key, internal.String2Bytes(topic)...)
 	}
 
-	set(key, obj, expireSecond)
+	set(key, obj)
 }
 
 // SetInt 缓存一个以int型KEY的对象，当对象已经存在返回false。topic为空则使用默认 _DefaultTopic_
-// key为键值；obj为存储对象；expireSecond为过期时间（单位是秒），如果为0则不过期
-func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) {
+func SetIntByTopic(topic string, key int64, obj interface{}) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
 	var hashKey []byte
@@ -165,11 +146,10 @@ func SetIntByTopic(topic string, key int64, obj interface{}, expireSecond int) {
 		hashKey = append(bKey[:], internal.String2Bytes(topic)...)
 	}
 
-	set(hashKey, obj, expireSecond)
+	set(hashKey, obj)
 }
 
 // Get 根据字符切片型键值获取对象，当对象不存在返回false。topic为空则使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetByTopic(topic string, key []byte) (obj interface{}, ok bool) {
 	if topic == "" {
 		key = append(key, defaultTopic...)
@@ -181,7 +161,6 @@ func GetByTopic(topic string, key []byte) (obj interface{}, ok bool) {
 }
 
 // GetInt 根据int型键值获取对象。topic为空则使用默认 _DefaultTopic_
-// ok 为是否获取成功，false则说明cache里面已经不存在此对象（可能被淘汰或者被Del()函数删除）
 func GetIntByTopic(topic string, key int64) (obj interface{}, ok bool) {
 	var bKey [internal.DefaultKeySize]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))
@@ -195,7 +174,6 @@ func GetIntByTopic(topic string, key int64) (obj interface{}, ok bool) {
 }
 
 // Del 根据字符切片的键值删除对象。topic为空则使用默认 _DefaultTopic_
-// ok返回为false则说明对象删除前已经不存在
 func DelByTopic(topic string, key []byte) (ok bool) {
 	if topic == "" {
 		key = append(key, defaultTopic...)
@@ -208,7 +186,6 @@ func DelByTopic(topic string, key []byte) (ok bool) {
 }
 
 // DelInt 根据int型键值删除对象。topic为空则使用默认 _DefaultTopic_
-// ok返回为false则说明对象删除前已经不存在
 func DelIntByTopic(topic string, key int64) (ok bool) {
 	var bKey [8]byte
 	binary.LittleEndian.PutUint64(bKey[:], uint64(key))

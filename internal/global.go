@@ -1,5 +1,7 @@
 package internal
 
+import "time"
+
 const (
 	DefaultKeySize = 50
 
@@ -18,3 +20,11 @@ const (
 	// 被访问的单位时间(单位为秒)，在单位时间内访问的次数即为访问频率
 	NodeUnitRestTime = 10
 )
+
+var (
+	SystemTime int64
+)
+
+func init() {
+	SystemTime = time.Now().Unix()
+}

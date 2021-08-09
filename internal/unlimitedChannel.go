@@ -49,7 +49,7 @@ func (c *chanCache) set(nc nodeChan) {
 
 // UnlimitedChannel 是一个不限定容量的channel。这样做只为应对存入对象超级密集的情况（如性能测试）。
 type UnlimitedChannel struct {
-	chanelCache *chanCache
+	channelCache *chanCache
 
 	channelList *list.List
 	lock        sync.Mutex
@@ -60,11 +60,11 @@ type UnlimitedChannel struct {
 func NewUnlimitedChannel() (s *UnlimitedChannel) {
 
 	s = &UnlimitedChannel{
-		channelList: list.New(),
-		chanelCache: newChanCache(),
+		channelList:  list.New(),
+		channelCache: newChanCache(),
 	}
 
-	nc := s.chanelCache.get()
+	nc := s.channelCache.get()
 	s.lock.Lock()
 	s.channelList.PushBack(nc)
 	s.lock.Unlock()
@@ -88,7 +88,7 @@ func (s *UnlimitedChannel) GetNode() (node *Node, ok bool) {
 			default:
 				if s.channelList.Len() > 1 {
 					nc := s.channelList.Remove(s.channelList.Front()).(nodeChan)
-					s.chanelCache.set(nc)
+					s.channelCache.set(nc)
 					nc = s.channelList.Front().Value.(nodeChan)
 					s.head = &nc
 				} else {
@@ -115,7 +115,7 @@ func (s *UnlimitedChannel) SetNode(node *Node) {
 				s.lock.Unlock()
 				return
 			default:
-				nc := s.chanelCache.get()
+				nc := s.channelCache.get()
 				s.channelList.PushBack(nc)
 				s.tail = &nc
 			}

@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+var (
+	nodeCache *NodeCache
+)
+
 // NodeCache 用于缓存internal.Node对象，减少动态分配给GC造成压力
 type NodeCache struct {
 	// 用于缓存node的channel
