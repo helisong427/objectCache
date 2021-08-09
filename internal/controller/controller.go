@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-// var InitDelete = 0
-// var DeleteCount = 0
-// var PrintFlag int
-// var DeleteNodeMap sync.Map
-
 /**
  名词解释：
  	访问频率qf（query frequency）：单位时间（UnitRestTime）内平均被访问的次数。
@@ -88,22 +83,7 @@ func (c *Controller) AddNode(n *internal.Node) {
 	c.unlimitedChannel.SetNode(n)
 }
 
-func (c *Controller) setTotalCountAndTotalTime(currentCount, currentTime uint32) {
-	//
-	// if (c.TotalTime + uint64(currentTime)) > 0xffffffffffffffff {
-	//	cacheAverageQf := (c.TotalCount * internal.ScaleFactor * internal.NodeUnitRestTime) / c.TotalTime
-	//	fmt.Printf("cache等比例缩放%d(%d-%d) ==>", cacheAverageQf, c.TotalTime, c.TotalCount)
-	//	rate := float64(c.TotalTime) / float64(c.TotalCount)
-	//
-	//	c.TotalCount = uint64(float64(c.TotalCount)/rate) + uint64(currentCount)
-	//	c.TotalTime = uint64(float64(c.TotalTime)/rate) + uint64(currentTime)
-	//	cacheAverageQf = (uint64(c.TotalCount) * internal.ScaleFactor * internal.NodeUnitRestTime) / c.TotalTime
-	//	fmt.Printf("%d(%d-%d) %s \n", cacheAverageQf, c.TotalTime, c.TotalCount,c.GetQueueCount())
-	// } else {
-	//	c.TotalCount += uint64(currentCount)
-	//	c.TotalTime += uint64(currentTime)
-	// }
-
+func (c *Controller) updateData(currentCount, currentTime uint32) {
 	// 总的访问次数和总的访问qf次数（大于休息队列的最大休息时间则等比例缩放）
 	now := time.Now().Unix()
 	if now-c.updateTotalBeginTime >= int64(internal.LevelSize*internal.LevelRestStep) {
@@ -168,7 +148,7 @@ func (c *Controller) eliminate(level int, currentCount, currentTime uint64, node
 	//	PrintFlag++
 	// }
 
-	node.UpdateNodeData(uint32(currentTime))
+	node.UpdateData(uint32(currentTime))
 
 	// nodeStability下降50%，则判断稳定性大幅下降，判断当前node的qf是否达到淘汰比例，达到移入destroyQueue队列。
 	// 则当currentQf为0（即在当前休息时间内没有被访问），则必定移入destroyQueue队列。
@@ -202,7 +182,7 @@ func (c *Controller) eliminate(level int, currentCount, currentTime uint64, node
 		}
 
 		// 更新cache总数
-		c.setTotalCountAndTotalTime(uint32(currentCount), uint32(currentTime))
+		c.updateData(uint32(currentCount), uint32(currentTime))
 		c.restQueue[levelTemp].addNode(node)
 	}
 
@@ -244,7 +224,7 @@ func (c *Controller) handle() {
 	var adjustLevelQueueTicker = time.NewTicker(time.Second * time.Duration(internal.LevelRestStep))
 	defer adjustLevelQueueTicker.Stop()
 
-	var nodes = make([]*internal.Node, 100)
+	var nodes = make([]*internal.Node, 0, 100)
 
 	for {
 		select {
@@ -270,7 +250,7 @@ func (c *Controller) handle() {
 			node, ok := c.unlimitedChannel.GetNode()
 			if ok {
 				// fmt.Printf("%s addNode: user ==> init, key:%d\n",time.Now().Format("15:04:05"), node.Hash)
-				node.UpdateNodeData(0)
+				node.UpdateData(0)
 				c.initialQueue.addNode(node)
 				// c.restQueue[0].addNode(node)
 
@@ -310,9 +290,9 @@ func (c *Controller) initialQueueHandle(nodes []*internal.Node, now uint32) {
 
 		currentCount = nodes[k].GetCurrentCount()
 
-		c.setTotalCountAndTotalTime(currentCount, c.initialQueue.restTime)
+		c.updateData(currentCount, c.initialQueue.restTime)
 
-		nodes[k].UpdateNodeData(c.initialQueue.restTime)
+		nodes[k].UpdateData(c.initialQueue.restTime)
 
 		// fmt.Printf("%s addNode: init ==> restQueue[0], key:%d\n",time.Now().Format("15:04:05"), nodes[k].Hash)
 		c.restQueue[0].addNode(nodes[k])
@@ -388,8 +368,8 @@ func (c *Controller) destroyQueueHandle(nodes []*internal.Node, now uint32) {
 		if nodeStability >= 1000 || (deleteCount <= 0 && nodeStability >= 700) {
 
 			// fmt.Printf("%s addNode: destroy ==> restQueue[0], key:%d\n",time.Now().Format("15:04:05"), nodes[k].Hash)
-			c.setTotalCountAndTotalTime(uint32(currentCount), c.destroyQueue.restTime)
-			nodes[k].UpdateNodeData(c.destroyQueue.restTime)
+			c.updateData(uint32(currentCount), c.destroyQueue.restTime)
+			nodes[k].UpdateData(c.destroyQueue.restTime)
 			c.restQueue[0].addNode(nodes[k])
 			c.restNodeCount++
 		} else {

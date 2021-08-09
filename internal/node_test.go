@@ -1,8 +1,11 @@
 package internal
 
 import (
+	"fmt"
+	"math"
 	"testing"
 	"time"
+	"unsafe"
 )
 
 func TestNode_GetCurrentCount(t *testing.T) {
@@ -15,7 +18,7 @@ func TestNode_GetCurrentCount(t *testing.T) {
 		t.Error("失败1")
 	}
 
-	n.UpdateNodeData(600)
+	n.UpdateData(600)
 
 	if n.GetCurrentCount() != 0 {
 		t.Error("失败3")
@@ -26,7 +29,7 @@ func TestNode_GetCurrentCount(t *testing.T) {
 
 	n.AddCurrentCount(9)
 
-	n.UpdateNodeData(600)
+	n.UpdateData(600)
 
 	if n.GetCurrentCount() != 0 {
 		t.Error("失败5")
@@ -52,4 +55,9 @@ func TestNode_IncrementReadCount(t *testing.T) {
 	if nn != 1 {
 		t.Error("失败")
 	}
+}
+
+func Test11(t *testing.T) {
+	fmt.Println(unsafe.Sizeof(uint32(1)))
+	fmt.Println(math.MaxUint16)
 }

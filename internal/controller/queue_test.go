@@ -13,7 +13,7 @@ func Test_queue_Total(t *testing.T) {
 	// pushBack
 	for i := 0; i < queueNodeSize/2; i++ {
 		n := &internal.Node{Hash: uint64(i)}
-		n.UpdateNodeData(0)
+		n.UpdateData(0)
 
 		ok := q.pushBack(n)
 		if !ok {
@@ -24,7 +24,7 @@ func Test_queue_Total(t *testing.T) {
 
 	for i := queueNodeSize / 2; i < queueNodeSize; i++ {
 		n := &internal.Node{Hash: uint64(i)}
-		n.UpdateNodeData(0)
+		n.UpdateData(0)
 
 		ok := q.pushBack(n)
 		if !ok {

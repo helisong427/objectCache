@@ -11,7 +11,7 @@ import (
 )
 
 var defaultTopic = []byte("_DefaultTopic_")
-var c *objectCache
+var cache *objectCache
 var objectCacheOnce sync.Once
 
 // 整个cache主要包含3个部分：
@@ -28,18 +28,18 @@ type objectCache struct {
 // objMaxCount 参数用于限制最大缓存数量，其范围为[1w ~ 10000w]，如果objMaxCount没有在这个范围，则采用默认值100w
 func InitObjectCache(objMaxCount int32) {
 	objectCacheOnce.Do(func() {
-		c = &objectCache{
+		cache = &objectCache{
 			nodeCache: internal.NewNodeCache(objMaxCount / 4),
 		}
 
 		for i := 0; i < storage.MaxSegmentSize; i++ {
-			c.segments[i] = &storage.Storage{NodeMap: make(map[uint64]*internal.Node)}
+			cache.segments[i] = &storage.Storage{NodeMap: make(map[uint64]*internal.Node)}
 		}
 
 		if objMaxCount > 1e8 || objMaxCount < 1e4 {
 			objMaxCount = 1e6
 		}
-		c.controller = controller.NewController(objMaxCount, &c.segments, c.nodeCache)
+		cache.controller = controller.NewController(objMaxCount, &cache.segments, cache.nodeCache)
 	})
 
 }
@@ -54,27 +54,27 @@ func set(key []byte, obj interface{}, expireSecond int) {
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
 
-	n := c.nodeCache.GetNode()
-	ok := c.segments[segID].Set(obj, hashVal, expireSecond, n)
+	node := cache.nodeCache.GetNode()
+	ok := cache.segments[segID].Set(obj, hashVal, expireSecond, node)
 	if ok {
-		c.controller.AddNode(n)
+		cache.controller.AddNode(node)
 	} else {
-		c.nodeCache.SaveNode(n)
+		cache.nodeCache.SaveNode(node)
 	}
 }
 
 func get(key []byte) (obj interface{}, ok bool) {
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
-	node, ok := c.segments[segID].Get(hashVal)
+	node, ok := cache.segments[segID].Get(hashVal)
 	if !ok {
 		return nil, false
 	}
 
 	if node.Expire != math.MaxUint32 && uint32(time.Now().Unix()) > node.Expire {
-		n, ok := c.segments[segID].Del(hashVal)
+		node, ok := cache.segments[segID].Del(hashVal)
 		if ok {
-			c.nodeCache.SaveDirtyNode(n)
+			cache.nodeCache.SaveDirtyNode(node)
 		}
 		return nil, false
 	}
@@ -85,11 +85,11 @@ func get(key []byte) (obj interface{}, ok bool) {
 func del(key []byte) (ok bool) {
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
-	var n *internal.Node
+	var node *internal.Node
 
-	n, ok = c.segments[segID].Del(hashVal)
+	node, ok = cache.segments[segID].Del(hashVal)
 	if ok {
-		c.nodeCache.SaveDirtyNode(n)
+		cache.nodeCache.SaveDirtyNode(node)
 	}
 
 	return ok
@@ -223,17 +223,17 @@ func DelIntByTopic(topic string, key int64) (ok bool) {
 
 // GetObjCount 获取当前时刻存储对象的个数（是一个瞬时值，可能并不是你预期的值）。
 func GetObjCount() (count int32) {
-	return c.controller.GetTotalCount()
+	return cache.controller.GetTotalCount()
 }
 
 // GetQueueCount 测试使用
 func GetQueueCount() (result string) {
 
-	return c.controller.GetQueueCount()
+	return cache.controller.GetQueueCount()
 }
 
 // GetDeleteNode 测试使用
-// func (c *objectCache) GetDeleteNode() (m sync.Map) {
+// func (cache *objectCache) GetDeleteNode() (m sync.Map) {
 //
-//	return c.controller.GetDeleteNode()
+//	return cache.controller.GetDeleteNode()
 // }

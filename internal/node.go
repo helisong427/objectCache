@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-const ()
+func init() {
+
+}
 
 // 存储的基本单元(sizeof = 48)
 type Node struct {
@@ -32,16 +34,14 @@ type Node struct {
 	Obj interface{}
 }
 
-// ResetRestBeginTimeAndCurrentCount 重置restBeginTime、currentCount
-// func (n *Node) ResetRestBeginTimeAndCurrentCount() (node *Node) {
-//
-//	n.RestBeginTime = uint32(time.Now().Unix())
-//	atomic.StoreUint32(&n.currentCount, 0)
-//	return n
-// }
+func (n *Node) Init(obj interface{}, hash uint64, now uint32) {
+	n.Hash = hash
+	n.Obj = obj
+	n.LastReadTime = now - NodeUnitRestTime
+}
 
-// UpdateNodeData 当node从休息队列中取出来后更新RestUnitCount、currentCount
-func (n *Node) UpdateNodeData(CurrentTime uint32) {
+// UpdateData 当node从休息队列中取出来后更新RestUnitCount、currentCount
+func (n *Node) UpdateData(CurrentTime uint32) {
 
 	// 设置totalCount
 	n.TotalCount += n.GetCurrentCount()
@@ -50,14 +50,8 @@ func (n *Node) UpdateNodeData(CurrentTime uint32) {
 
 	// TotalTime、TotalCount是用于计算最近访问频率，这个最近的期限定为restQueue休息的最大时间，当超过这个时间就等比例缩放1倍
 	if uint64(n.TotalTime) >= LevelRestStep*LevelSize {
-
-		// nodeAverageQf := uint64(n.TotalCount) * 1000 * NodeUnitRestTime / uint64(n.TotalTime)
-
-		// fmt.Printf("node等比例缩放%d(%d-%d) ==>", nodeAverageQf, n.TotalTime, n.TotalCount)
 		n.TotalTime = n.TotalTime / 2
 		n.TotalCount = n.TotalCount / 2
-		// nodeAverageQf = uint64(n.TotalCount) * 1000 * NodeUnitRestTime / uint64(n.TotalTime)
-		// fmt.Printf("%d(%d-%d) \n", nodeAverageQf, n.TotalTime, n.TotalCount)
 	}
 
 	n.RestBeginTime = uint32(time.Now().Unix())
@@ -72,10 +66,6 @@ func (n *Node) GetCurrentCount() (count uint32) {
 
 func (n *Node) AddCurrentCount(count uint32) {
 	atomic.AddUint32(&n.currentCount, count)
-}
-
-func (n *Node) InitReadCount() {
-	n.currentCount = 0
 }
 
 func (n *Node) IncrementReadCount() (ok bool) {

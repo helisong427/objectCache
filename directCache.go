@@ -14,10 +14,10 @@ func setDirect(key []byte, obj interface{}, expireSecond int) {
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
 
-	n := c.nodeCache.GetNode()
-	ok := c.segments[segID].Set(obj, hashVal, expireSecond, n)
+	n := cache.nodeCache.GetNode()
+	ok := cache.segments[segID].Set(obj, hashVal, expireSecond, n)
 	if !ok {
-		c.nodeCache.SaveNode(n)
+		cache.nodeCache.SaveNode(n)
 	}
 	return
 }
@@ -26,15 +26,15 @@ func setDirect(key []byte, obj interface{}, expireSecond int) {
 func getDirect(key []byte) (obj interface{}, ok bool) {
 	hashVal := internal.HashFunc(key)
 	segID := hashVal % storage.MaxSegmentSize
-	node, ok := c.segments[segID].Get(hashVal)
+	node, ok := cache.segments[segID].Get(hashVal)
 	if !ok {
 		return nil, false
 	}
 
 	if node.Expire != math.MaxUint32 && uint32(time.Now().Unix()) > node.Expire {
-		n, ok := c.segments[segID].Del(hashVal)
+		n, ok := cache.segments[segID].Del(hashVal)
 		if ok {
-			c.nodeCache.SaveNode(n)
+			cache.nodeCache.SaveNode(n)
 		}
 		return nil, false
 	}
@@ -48,9 +48,9 @@ func delDirect(key []byte) (ok bool) {
 	segID := hashVal % storage.MaxSegmentSize
 	var n *internal.Node
 
-	n, ok = c.segments[segID].Del(hashVal)
+	n, ok = cache.segments[segID].Del(hashVal)
 	if ok {
-		c.nodeCache.SaveNode(n)
+		cache.nodeCache.SaveNode(n)
 	}
 
 	return ok

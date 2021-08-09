@@ -29,14 +29,14 @@ func (s *restQueue) setRestTime(t uint32) {
 }
 
 // 获取到期的所有到期的node
-func (s *restQueue) getExpireNodes(now uint32, n []*internal.Node) (nodes []*internal.Node) {
+func (s *restQueue) getExpireNodes(now uint32, nodes []*internal.Node) []*internal.Node {
 
 	expireTime := now - s.restTime
 	var isEnd bool
 	var q *queue
 	for i := s.queueList.Front(); i != nil; i = i.Next() {
 		q = i.Value.(*queue)
-		n, isEnd = q.fronts(expireTime, n)
+		nodes, isEnd = q.fronts(expireTime, nodes)
 		if isEnd {
 			q.reset()
 
@@ -51,16 +51,16 @@ func (s *restQueue) getExpireNodes(now uint32, n []*internal.Node) (nodes []*int
 		}
 
 	}
-	s.count = s.count - int32(len(n))
-	return n
+	s.count = s.count - int32(len(nodes))
+	return nodes
 }
 
 // addNode 添加一个node到末尾
-func (s *restQueue) addNode(n *internal.Node) {
+func (s *restQueue) addNode(node *internal.Node) {
 
-	if !s.queueList.Back().Value.(*queue).pushBack(n) {
+	if !s.queueList.Back().Value.(*queue).pushBack(node) {
 		s.queueList.PushBack(queueCacheObj.getQueue())
-		s.addNode(n)
+		s.addNode(node)
 	} else {
 		s.count++
 	}
